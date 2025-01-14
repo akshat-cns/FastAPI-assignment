@@ -1,3 +1,4 @@
 __pycache__
 fastapi_event
-event_booking
+event_booking.db
+
