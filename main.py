@@ -22,13 +22,23 @@ def get_db():
 app.include_router(admin_router, prefix="/admin", tags=["Admin"])
 app.include_router(user_router, tags=["User"])
 
+@app.get("/")
+def root():
+    return {"message": "Welcome to the Event Booking System!"}
+
 @app.post("/register")
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.username == user.username).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
-    user.hashed_password = auth.get_password_hash(user.hashed_password)
-    return crud.create_user(db=db,user=user)
+    
+    hashed_password = auth.get_password_hash(user.password)
+    user_data = models.User(username=user.username, hashed_password=hashed_password, is_admin=False)
+    db.add(user_data)
+    db.commit()
+    db.refresh(user_data)
+    
+    return {"message": f"User '{user.username}' registered successfully."}
 
 @app.post("/login", response_model=schemas.LoginResponse)
 def login(request: schemas.LoginRequest, db: Session = Depends(get_db)):
@@ -39,7 +49,7 @@ def login(request: schemas.LoginRequest, db: Session = Depends(get_db)):
             detail="Invalid credentials",
         )
 
-    if not auth.verify_password(request.password, user.password):
+    if not auth.verify_password(request.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",

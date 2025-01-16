@@ -23,11 +23,19 @@ class EventResponse(EventBase):
     class Config:
         from_attributes = True
 
+class User(BaseModel):
+    id: int
+    username: str
+    is_admin: bool
+
+    class Config:
+        from_attributes = True
+
 class UserBase(BaseModel):
     username: str
 
 class UserCreate(UserBase):
-    hashed_password: str
+    password: str
 
 class UserResponse(UserBase):
     id: int
