@@ -19,7 +19,7 @@ def add_new_event(event: EventCreate, db: Session = Depends(get_db),current_admi
     return db_event
 
 @admin_router.put("/events/{event_id}", response_model=EventResponse)
-def update_event_details(event_id: int, event: EventUpdate, db: Session = Depends(get_db),current_admin: User = Security(get_current_admin_user)):
+def update_event_details(event_id: int, event: EventUpdate, db: Session = Depends(get_db),current_admin: User = Security    (get_current_admin_user)):  
     db_event = update_event(db, event_id, event)
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found.")
